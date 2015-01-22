@@ -7,6 +7,7 @@ use Carp qw(cluck croak carp);
 use Data::Dumper;
 use LWP::UserAgent;
 use Moo;
+use JSON::XS;
 require Exporter;
 
 
@@ -61,8 +62,18 @@ sub BUILD {
 
 sub get {
     my $self = shift;
-    my $resp = $self->{'ua'}->get($self->url);
-    print Dumper $resp;
+    my $path = shift;
+    my $resp = $self->{'ua'}->get($self->url . $path);
+
+    if ($resp->is_success()) {
+        my $out;
+        eval {
+            $out = decode_json($resp->content)
+        };
+        return $out;
+    } else {
+        print Dumper $resp;
+    }       
     return;
 }
 
